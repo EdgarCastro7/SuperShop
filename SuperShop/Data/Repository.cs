@@ -1,0 +1,55 @@
+﻿using Microsoft.AspNetCore.Mvc;
+using SuperShop.Data.Entities;
+using System.Collections;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+
+namespace SuperShop.Data
+{
+    public class Repository : IRepository
+    {
+        private readonly DataContext _context;
+
+        public Repository(DataContext context)
+        {
+            _context = context;
+        }
+
+        public IEnumerable<Product> GetProducts() //Metodo que vai buscar todos os produtos
+        {
+            return _context.Products.OrderBy(p => p.Name);
+        }
+
+        public Product GetProduct(int id)
+        {
+            return _context.Products.Find(id);
+        }
+
+        public void AddProduct(Product product)
+        {
+            _context.Products.Add(product);
+        }
+
+        public void UpdateProduct(Product product)
+        {
+            _context.Products.Update(product);
+        }
+
+        public void DeleteProduct(Product product)
+        {
+            _context.Products.Remove(product);
+        }
+
+        public async Task<bool> SaveAllAsync() //Gravar na BD
+        {
+            return await _context.SaveChangesAsync() > 0;
+        }
+
+
+        public bool ProductExists(int id)
+        {
+            return _context.Products.Any(p => p.Id == id);
+        }
+    }
+}

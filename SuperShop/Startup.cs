@@ -27,7 +27,7 @@ namespace SuperShop
                // utilizando a connection string "DefaultConnection" do appsettings.json
 
             services.AddTransient<SeedDb>();
-
+            services.AddScoped<IRepository, Repository>();
             services.AddControllersWithViews();
         }
 
