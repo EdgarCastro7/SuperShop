@@ -51,6 +51,8 @@ namespace SuperShop
 
             services.AddScoped<IProductRepository, ProductRepository>();
 
+            services.AddScoped<IOrderRepository, OrderRepository>();
+
             services.ConfigureApplicationCookie(options =>
             {
                 options.LoginPath = "/Account/NotAuthorized"; //Instead of showing the loggin, it will exec the Account/NotAuthorize
