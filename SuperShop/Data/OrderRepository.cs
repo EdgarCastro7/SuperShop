@@ -2,6 +2,7 @@
 using SuperShop.Data.Entities;
 using SuperShop.Helpers;
 using SuperShop.Models;
+using System;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -57,6 +58,46 @@ namespace SuperShop.Data
             await _context.SaveChangesAsync();
         }
 
+        public async Task<bool> ConfirmOrderAsync(string userName)
+        {
+            var user = await _userHelper.GetUserByEmailAsync(userName);
+
+            if (user == null)
+            {
+                return false;
+            }
+
+            var orderTmps = await _context.OrderDetailTemps.
+                Include(o => o.Product)
+                .Where(o => o.User == user)
+                .ToListAsync();
+
+            if(orderTmps == null || orderTmps.Count == 0)
+            {
+                return false;
+            }
+
+            var details = orderTmps.Select(o => new OrderDetail   //Pega na encomenda temporaria e transforma em uma encomenda
+            {
+                Price = o.Price,
+                Quantity = o.Quantity,
+                Product = o.Product,
+            }).ToList();
+
+            var order = new Order
+            {
+                OrderDate = DateTime.UtcNow,
+                User = user,
+                Items = details
+            };
+
+            await CreateAsync(order);
+            _context.OrderDetailTemps.RemoveRange(orderTmps);  //Apagamos a encomenda temporária toda
+
+            await _context.SaveChangesAsync();
+            return true;
+        }
+
         public async Task DeleteDetailTempAsync(int id)
         {
             var orderDetailTemp = await _context.OrderDetailTemps.FindAsync(id);
@@ -93,7 +134,7 @@ namespace SuperShop.Data
 
             if (await _userHelper.IsUserInRoleAsync(user, "Admin"))
             {
-                return _context.Orders.Include(o => o.Items).ThenInclude(p => p.Product).OrderByDescending(o => o.OrderDate);
+                return _context.Orders.Include(o => o.User).Include(o => o.Items).ThenInclude(p => p.Product).OrderByDescending(o => o.OrderDate);
             }
 
             return _context.Orders.Include(o => o.Items)
