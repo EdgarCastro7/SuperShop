@@ -10,6 +10,7 @@ using SuperShop.Data;
 using SuperShop.Data.Entities;
 using SuperShop.Helpers;
 using System.Text;
+using Vereyon.Web;
 
 namespace SuperShop
 {
@@ -58,6 +59,8 @@ namespace SuperShop
                 cfg.UseSqlServer(this.Configuration.GetConnectionString("DefaultConnection"));
             });// Regista o DataContext e configura a ligação ao SQL Server
                // utilizando a connection string "DefaultConnection" do appsettings.json
+
+            services.AddFlashMessage();
 
             services.AddTransient<SeedDb>();
 
